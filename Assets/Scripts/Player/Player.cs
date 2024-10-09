@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
     [Header("Move Info")]
     public float moveSpeed;
@@ -17,27 +15,12 @@ public class Player : MonoBehaviour
     public float dashDir { get; private set; }
     public float dashCooldown;
     private float dashCooldownTimer;
-
-    [Header("Collision Info")]
-    public Transform groundCheck;
-    public float groundCheckDistance;
-    public Transform wallCheck;
-    public float wallCheckDistance;
-    public LayerMask groundLayerMask;
     
     [Header("Attack Info")]
     public float comboResetCooldown;
     public Vector2[] comboMoveSpeed;
     
-    public int facingDir { get; private set; } = 1;
-    private bool facingRight = true;
-    
     public bool busyLock = false;
-    
-    #region Components
-    public Animator animator { get; private set; }
-    public Rigidbody2D rb { get; private set; }
-    #endregion
     
     #region Animations
     public PlayerStateMachine stateMachine { get; private set; }
@@ -52,8 +35,10 @@ public class Player : MonoBehaviour
     public PlayerPrimaryAttackState attackState { get; private set; }
     #endregion
     
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+        
         stateMachine = new PlayerStateMachine();
 
         idleState = new PlayerIdleState(this, stateMachine, "Idle");
@@ -66,15 +51,17 @@ public class Player : MonoBehaviour
         attackState = new PlayerPrimaryAttackState(this, stateMachine, "Attack");
     }
 
-    void Start()
+    protected override void Start()
     {
-        animator = GetComponentInChildren<Animator>();
-        rb = GetComponent<Rigidbody2D>();
+        base.Start();
+        
         stateMachine.Initialize(idleState);
     }
 
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+        
         DashController();
         stateMachine.currentState.Update();
     }
@@ -104,38 +91,7 @@ public class Player : MonoBehaviour
         }
     }
     
-    public void FlipController(float x)
-    {
-        if (x > 0 && !facingRight || x < 0 && facingRight)
-            Flip();
-    }
-
-    public void Flip()
-    {
-        facingDir *= -1;
-        facingRight = !facingRight;
-        transform.Rotate(0, 180, 0);
-    }
-    
-    /**
-     * 设置速度
-     * 可以设置是否进行翻转判断，用于避免物理碰撞导致的少量速度回弹
-     */
-    public void SetVelocity(float xVelocity, float yVelocity, bool checkFlip = true)
-    {
-        rb.velocity = new Vector2(xVelocity, yVelocity);
-        if (checkFlip)
-            FlipController(xVelocity);
-    }
-
-    /**
-     * 设置速度为0
-     */
-    public void SetVelocityZero() => rb.velocity = new Vector2(0, 0);
-    
-    public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, groundLayerMask);
-
-    public bool IsWallDetected() => Physics2D.Raycast(wallCheck.position, facingDir * Vector2.right, wallCheckDistance, groundLayerMask);
+    public void AnimatorTrigger() => stateMachine.currentState.AnimationTrigger();
     
     public IEnumerator BusyLockFor(float seconds)
     {
@@ -144,11 +100,4 @@ public class Player : MonoBehaviour
         busyLock = false;
     }
 
-    public void AnimatorTrigger() => stateMachine.currentState.AnimationTrigger();
-    
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallCheckDistance * facingDir, wallCheck.position.y));
-    }
 }
