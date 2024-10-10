@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyState
 {
     protected Enemy enemy;
+    protected Transform player;
     protected EnemyStateMachine stateMachine;
     public string animBoolName;
     
