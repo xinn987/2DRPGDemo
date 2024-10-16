@@ -18,25 +18,35 @@ public class PlayerGroundedState : PlayerState
     {
         base.Update();
         
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            stateMachine.ChangeState(player.attackState);
-        }
+        // 右键反击
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             stateMachine.ChangeState(player.counterAttackState);
+            return;
         }
-        if (Input.GetKeyDown(KeyCode.Mouse2))
+        // 左键攻击
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            stateMachine.ChangeState(player.attackState);
+            return;
+        }
+        // 中键瞄准
+        if (Input.GetKeyDown(KeyCode.Mouse2) && player.skillManager.throwSkill.CanUseSkill())
         {
             stateMachine.ChangeState(player.throwAimState);
+            return;
         }
-        if (!player.IsGroundDetected())
-        {
-            stateMachine.ChangeState(player.airState);
-        }
+        // 地面起跳
         if (Input.GetKeyDown(KeyCode.Space) && player.IsGroundDetected())
         {
             stateMachine.ChangeState(player.jumpState);
+            return;
+        }
+        // 空中姿态
+        if (!player.IsGroundDetected())
+        {
+            stateMachine.ChangeState(player.airState);
+            return;
         }
     }
 

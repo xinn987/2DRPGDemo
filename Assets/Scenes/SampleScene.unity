@@ -4984,6 +4984,7 @@ MonoBehaviour:
   throwPrefab: {fileID: 7541308352380456611, guid: 470ddaa587bfad54784a87ada5aab15f, type: 3}
   throwSpeed: 17
   throwGravityScale: 3
+  returnSpeed: 15
   dotPrefab: {fileID: 6899110608293068991, guid: 51b6d173359606744bceac77260b59af, type: 3}
   dotsNum: 40
   dotsInterval: 0.05

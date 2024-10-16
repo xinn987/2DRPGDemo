@@ -6,11 +6,13 @@ using UnityEngine.PlayerLoop;
 
 public class ThrowSkill : Skill
 {
-    [Header("Throw Skill")]
+    [Header("Throw Skill")] 
     [SerializeField] private GameObject throwPrefab;
     [SerializeField] private float throwSpeed;
     [SerializeField] private float throwGravityScale;
+    public float returnSpeed;
     private Vector2 throwDirection;
+    public GameObject throwInstance { get; private set; }
 
     [Header("AimIndicator")] 
     [SerializeField] private GameObject dotPrefab;
@@ -25,34 +27,11 @@ public class ThrowSkill : Skill
         GenerateAimIndicatorDots();
     }
 
-    protected override void Update()
-    {
-        base.Update();
-        // 按住按键时，持续更新每个点的位置
-        if (Input.GetKey(KeyCode.Mouse2))
-        {
-            Vector2 throwDirection = GetThrowDirection();
-            for (int i = 0; i < dotsArr.Length; i++)
-            {
-                dotsArr[i].transform.position = CalcAimIndicatorDotPosition(throwDirection, i * dotsInterval);
-            }
-            // 玩家面向瞄准方向
-            if (throwDirection.x * player.facingDir < 0)
-            {
-                player.Flip();
-            }
-        }
-        // 松开按键，固化throw方向
-        if (Input.GetKeyUp(KeyCode.Mouse2))
-        {
-            throwDirection = GetThrowDirection();
-        }
-    }
-
     public void Create(Transform spawnPoint)
     {
         GameObject throwObject = Instantiate(throwPrefab);
         throwObject.GetComponent<ThrowController>().Setup(spawnPoint, throwDirection * throwSpeed, throwGravityScale);
+        throwInstance = throwObject;
     }
 
     /**
@@ -73,6 +52,36 @@ public class ThrowSkill : Skill
         {
             dotsArr[i].SetActive(isActive);
         }
+    }
+
+    public void OnAimPressing()
+    {
+        Vector2 throwDirection = GetThrowDirection();
+        for (int i = 0; i < dotsArr.Length; i++)
+        {
+            dotsArr[i].transform.position = CalcAimIndicatorDotPosition(throwDirection, i * dotsInterval);
+        }
+        // 玩家面向瞄准方向
+        if (throwDirection.x * player.facingDir < 0)
+        {
+            player.Flip();
+        }
+    }
+
+    public void OnAimReleased()
+    {
+        throwDirection = GetThrowDirection();
+    }
+
+    public override bool CanUseSkill()
+    {
+        return base.CanUseSkill() && throwInstance == null;
+    }
+
+    public void ClearThrowInstance()
+    {
+        player.stateMachine.ChangeState(player.throwCatchState);
+        Destroy(throwInstance);
     }
 
     /**

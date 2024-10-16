@@ -12,7 +12,7 @@ public class PlayerStateMachine
 
     public void ChangeState(PlayerState newState)
     {
-        // Debug.Log($"ChangeState: {currentState.animBoolName} -> {newState.animBoolName}");
+        Debug.Log($"ChangeState: {currentState.GetType().Name} -> {newState.GetType().Name}");
         currentState.Exit();
         currentState = newState;
         currentState.Enter();

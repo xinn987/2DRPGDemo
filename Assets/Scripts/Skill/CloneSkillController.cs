@@ -58,7 +58,7 @@ public class CloneSkillController : MonoBehaviour
         float minDistance = float.MaxValue;
         foreach (var hit in hits)
         {
-            if (hit.GetComponent<Enemy>() is not null)
+            if (hit.GetComponent<Enemy>() != null)
             {
                 float distance = Vector2.Distance(hit.transform.position, transform.position);
                 if (distance < minDistance)
@@ -71,7 +71,7 @@ public class CloneSkillController : MonoBehaviour
 
         // 范围内没有敌人，方向为player的方向
         float facingDir = player.facingDir;
-        if (closest is not null)
+        if (closest != null)
         {
             facingDir = closest.position.x - transform.position.x;
         }
